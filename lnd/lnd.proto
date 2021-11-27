@@ -1,0 +1,51 @@
+
+syntax = "proto3";
+
+option go_package = "github.com/beesaferoot/gprc-lnd;lnd";
+service LND {
+
+    rpc SpawnNodes(stream NodeDetails) returns (NodeList) {}
+    rpc GetNodesListByStatus(Status) returns (NodeList) {}
+    rpc DestroyNode(NodeId) returns (NodeDetails) {}
+}
+
+
+message NodeDetails {
+    string Nodename = 1;
+    string IP = 2;
+    UUID UserId = 3;
+    Date CreateAt = 4; 
+}
+
+message Status {
+    enum value {
+        FAILED = 0;
+        RUNNING = 1;
+    }
+}
+
+message NodeList {
+    repeated Node users = 1;
+}
+
+
+message Node{
+    string name = 1;
+    string ip = 2;
+    int32 id = 3;
+    Status status = 4; 
+}
+
+message NodeId {
+    int32 value = 1;
+}
+
+message Date {
+    int32 year = 1;
+    int32 month = 2;
+    int32 day = 3;
+}
+
+message UUID {
+    string value = 1;
+}
