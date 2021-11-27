@@ -20,7 +20,7 @@ const _ = grpc.SupportPackageIsVersion7
 type LNDClient interface {
 	SpawnNodes(ctx context.Context, opts ...grpc.CallOption) (LND_SpawnNodesClient, error)
 	GetNodesListByStatus(ctx context.Context, in *Status, opts ...grpc.CallOption) (*NodeList, error)
-	DestroyNode(ctx context.Context, in *NodeId, opts ...grpc.CallOption) (*NodeDetails, error)
+	DestroyNode(ctx context.Context, in *NodeId, opts ...grpc.CallOption) (*NodeDetail, error)
 }
 
 type lNDClient struct {
@@ -41,7 +41,7 @@ func (c *lNDClient) SpawnNodes(ctx context.Context, opts ...grpc.CallOption) (LN
 }
 
 type LND_SpawnNodesClient interface {
-	Send(*NodeDetails) error
+	Send(*NodeDetail) error
 	CloseAndRecv() (*NodeList, error)
 	grpc.ClientStream
 }
@@ -50,7 +50,7 @@ type lNDSpawnNodesClient struct {
 	grpc.ClientStream
 }
 
-func (x *lNDSpawnNodesClient) Send(m *NodeDetails) error {
+func (x *lNDSpawnNodesClient) Send(m *NodeDetail) error {
 	return x.ClientStream.SendMsg(m)
 }
 
@@ -74,8 +74,8 @@ func (c *lNDClient) GetNodesListByStatus(ctx context.Context, in *Status, opts .
 	return out, nil
 }
 
-func (c *lNDClient) DestroyNode(ctx context.Context, in *NodeId, opts ...grpc.CallOption) (*NodeDetails, error) {
-	out := new(NodeDetails)
+func (c *lNDClient) DestroyNode(ctx context.Context, in *NodeId, opts ...grpc.CallOption) (*NodeDetail, error) {
+	out := new(NodeDetail)
 	err := c.cc.Invoke(ctx, "/LND/DestroyNode", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -89,7 +89,7 @@ func (c *lNDClient) DestroyNode(ctx context.Context, in *NodeId, opts ...grpc.Ca
 type LNDServer interface {
 	SpawnNodes(LND_SpawnNodesServer) error
 	GetNodesListByStatus(context.Context, *Status) (*NodeList, error)
-	DestroyNode(context.Context, *NodeId) (*NodeDetails, error)
+	DestroyNode(context.Context, *NodeId) (*NodeDetail, error)
 	mustEmbedUnimplementedLNDServer()
 }
 
@@ -103,7 +103,7 @@ func (UnimplementedLNDServer) SpawnNodes(LND_SpawnNodesServer) error {
 func (UnimplementedLNDServer) GetNodesListByStatus(context.Context, *Status) (*NodeList, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetNodesListByStatus not implemented")
 }
-func (UnimplementedLNDServer) DestroyNode(context.Context, *NodeId) (*NodeDetails, error) {
+func (UnimplementedLNDServer) DestroyNode(context.Context, *NodeId) (*NodeDetail, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DestroyNode not implemented")
 }
 func (UnimplementedLNDServer) mustEmbedUnimplementedLNDServer() {}
@@ -125,7 +125,7 @@ func _LND_SpawnNodes_Handler(srv interface{}, stream grpc.ServerStream) error {
 
 type LND_SpawnNodesServer interface {
 	SendAndClose(*NodeList) error
-	Recv() (*NodeDetails, error)
+	Recv() (*NodeDetail, error)
 	grpc.ServerStream
 }
 
@@ -137,8 +137,8 @@ func (x *lNDSpawnNodesServer) SendAndClose(m *NodeList) error {
 	return x.ServerStream.SendMsg(m)
 }
 
-func (x *lNDSpawnNodesServer) Recv() (*NodeDetails, error) {
-	m := new(NodeDetails)
+func (x *lNDSpawnNodesServer) Recv() (*NodeDetail, error) {
+	m := new(NodeDetail)
 	if err := x.ServerStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
