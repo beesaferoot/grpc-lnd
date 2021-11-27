@@ -30,8 +30,22 @@ type LNDServer struct {
 }
 
 func (s *LNDServer) GetNodesListByStatus(ctx context.Context, status *pb.Status) (*pb.NodeList, error) {
-	//TODO
-	return &pb.NodeList{}, nil
+	var nodeList *pb.NodeList = &pb.NodeList{}
+	rows, err := s.conn.Query(context.Background(), "select * from nodes where node.status = "+status.Value.String())
+	if err != nil {
+		return nil, err
+	}
+	// get node details
+	for rows.Next() {
+		nodeDetail := &pb.NodeDetail{}
+		var status int32
+		err = rows.Scan(&nodeDetail.Id, &nodeDetail.Nodename, &nodeDetail.IP, &nodeDetail.UserId.Value, &status)
+		if err != nil {
+			return nil, err
+		}
+		nodeList.Nodes = append(nodeList.Nodes, nodeDetail)
+	}
+	return nodeList, nil
 }
 
 func (s *LNDServer) DestroyNode(ctx context.Context, id *pb.NodeId) (*pb.NodeDetail, error) {
@@ -55,6 +69,9 @@ func (s *LNDServer) SpawnNodes(stream pb.LND_SpawnNodesServer) error {
 				nodeDetail := &pb.NodeDetail{}
 				var status int32
 				err = rows.Scan(&nodeDetail.Id, &nodeDetail.Nodename, &nodeDetail.IP, &nodeDetail.UserId.Value, &status)
+				if err != nil {
+					return err
+				}
 				nodeList.Nodes = append(nodeList.Nodes, nodeDetail)
 			}
 			return stream.SendAndClose(nodeList)
