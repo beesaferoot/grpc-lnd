@@ -15,8 +15,8 @@ message NodeDetail {
     int32 id = 1;
     string Nodename = 2;
     string IP = 3;
-    UUID UserId = 4;
-    Date CreateAt = 5; 
+    string UserId = 4;
+    string CreateAt = 5; 
     Status.Value status = 6;
 }
 
@@ -35,14 +35,4 @@ message NodeList {
 
 message NodeId {
     int32 value = 1;
-}
-
-message Date {
-    int32 year = 1;
-    int32 month = 2;
-    int32 day = 3;
-}
-
-message UUID {
-    string value = 1;
 }

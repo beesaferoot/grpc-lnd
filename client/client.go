@@ -25,12 +25,13 @@ func main() {
 	ctx, cancel := context.WithTimeout(globContext, time.Second)
 	defer cancel()
 	nodeList := &pb.NodeList{}
-	nodeDetail := &pb.NodeDetail{IP: "client-node-ip", UserId: &pb.UUID{Value: "client-id"}}
-	nodeList.Nodes = append(nodeList.Nodes, nodeDetail)
+	nodeList.Nodes = append(nodeList.Nodes, &pb.NodeDetail{Nodename: "node1", IP: "client-node-ip", UserId: "client-id", Status: pb.Status_RUNNING})
+	nodeList.Nodes = append(nodeList.Nodes, &pb.NodeDetail{Nodename: "node2", IP: "client-node-ip1", UserId: "client-id1", Status: pb.Status_RUNNING})
+	nodeList.Nodes = append(nodeList.Nodes, &pb.NodeDetail{Nodename: "node3", IP: "client-node-ip3", UserId: "client-id3", Status: pb.Status_FAILED})
 	SpawnNodes(ctx, client, nodeList)
-	GetNodesListByStatus(ctx, client, &pb.Status{Value: 1}) // get running nodes
-	GetNodesListByStatus(ctx, client, &pb.Status{Value: 1}) // get failed nodes
-	DestroyNode(ctx, client, &pb.NodeId{Value: 4})
+	GetNodesListByStatus(ctx, client, &pb.Status{Value: pb.Status_RUNNING}) // get running nodes
+	GetNodesListByStatus(ctx, client, &pb.Status{Value: pb.Status_FAILED})  // get failed nodes
+	DestroyNode(ctx, client, &pb.NodeId{Value: 1})
 }
 
 func SpawnNodes(cxt context.Context, client pb.LNDClient, nodeList *pb.NodeList) {
@@ -44,11 +45,10 @@ func SpawnNodes(cxt context.Context, client pb.LNDClient, nodeList *pb.NodeList)
 			log.Fatalf("%v.Send(%v) = %v", stream, nodeDetail, err)
 		}
 	}
-	availNodes, err := stream.CloseAndRecv()
+	_, err = stream.CloseAndRecv()
 	if err != nil {
 		log.Fatalf("%v.CloseAndRecv() got error %v, want %v", stream, err, nil)
 	}
-	log.Printf("List of Nodes: %v", availNodes)
 }
 
 func GetNodesListByStatus(ctx context.Context, client pb.LNDClient, status *pb.Status) {
@@ -58,7 +58,7 @@ func GetNodesListByStatus(ctx context.Context, client pb.LNDClient, status *pb.S
 	if err != nil {
 		log.Fatalf("Error retrieving Nodes: %v", err)
 	}
-	log.Printf("Nodes: %v", nodeList.Nodes)
+	log.Printf("Nodes: %v\n\n\n", nodeList.Nodes)
 }
 
 func DestroyNode(ctx context.Context, client pb.LNDClient, nodeId *pb.NodeId) {
