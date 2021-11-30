@@ -45,7 +45,7 @@ func (s *LNDServer) GetNodesListByStatus(ctx context.Context, status *pb.Status)
 		if err != nil {
 			return nil, err
 		}
-		nodeDetail.CreateAt = currentTime.Format("2000-01-01")
+		nodeDetail.CreateAt = currentTime.Format("2006-01-02")
 		nodeList.Nodes = append(nodeList.Nodes, nodeDetail)
 	}
 	return nodeList, nil
@@ -79,7 +79,7 @@ func (s *LNDServer) SpawnNodes(stream pb.LND_SpawnNodesServer) error {
 				nodeDetail := &pb.NodeDetail{}
 				var currentTime time.Time
 				err = rows.Scan(&nodeDetail.Id, &nodeDetail.Nodename, &nodeDetail.IP, &nodeDetail.UserId, &nodeDetail.Status, &currentTime)
-				nodeDetail.CreateAt = currentTime.Format("2000-01-01")
+				nodeDetail.CreateAt = currentTime.Format("2006-01-02")
 				if err != nil {
 					return err
 				}
