@@ -12,6 +12,7 @@ import (
 	pb "github.com/beesaferoot/grpc-lnd/lnd"
 	"github.com/jackc/pgx/v4"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
 const (
@@ -84,7 +85,7 @@ func (s *LNDServer) SpawnNodes(stream pb.LND_SpawnNodesServer) error {
 				}
 				nodeList.Nodes = append(nodeList.Nodes, nodeDetail)
 			}
-			return stream.SendAndClose(nodeList)
+			return stream.SendAndClose(nodeList)	
 		}
 
 		if err != nil {
@@ -105,6 +106,7 @@ func (s *LNDServer) Run() error {
 	}
 
 	grpcServer := grpc.NewServer()
+	reflection.Register(grpcServer)
 	pb.RegisterLNDServer(grpcServer, s)
 	log.Printf("server listening at %v", lis.Addr())
 	return grpcServer.Serve(lis)
